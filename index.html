@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Scraper Amazon</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input, button { padding: 10px; margin-right: 10px; }
+    .product { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h1>Scraper Amazon</h1>
+  <input type="text" id="keyword" placeholder="Digite uma palavra-chave">
+  <button onclick="scrape()">Buscar</button>
+  <div id="results"></div>
+
+  <script>
+    async function scrape() {
+      const keyword = document.getElementById("keyword").value;
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "Buscando...";
+
+      try {
+        const response = await fetch(`http://localhost:3000/api/scrape?keyword=${encodeURIComponent(keyword)}`);
+        const data = await response.json();
+
+        if (data.error) {
+          resultsDiv.innerHTML = `<p>Erro: ${data.error}</p>`;
+        } else {
+          resultsDiv.innerHTML = data.products.map(p => `
+            <div class="product">
+              <img src="${p.imageUrl}" width="100"><br>
+              <strong>${p.title}</strong><br>
+              ${p.rating || 'Sem avaliação'} - ${p.reviews || '0 avaliações'}
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        resultsDiv.innerHTML = `<p>Erro ao conectar com servidor.</p>`;
+      }
+    }
+  </script>
+</body>
+</html>
